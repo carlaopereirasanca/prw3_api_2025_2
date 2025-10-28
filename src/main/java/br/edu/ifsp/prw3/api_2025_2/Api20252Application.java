@@ -9,7 +9,8 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 public class Api20252Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Api20252Application.class, args);
+
+        SpringApplication.run(Api20252Application.class, args);
 	}
 
 }

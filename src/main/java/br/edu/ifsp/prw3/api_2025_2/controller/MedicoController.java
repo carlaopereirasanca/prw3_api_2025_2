@@ -19,8 +19,14 @@ import java.util.Optional;
 @RequestMapping("medicos")
 public class MedicoController {
 
-    @Autowired
-    private MedicoRepository repository;
+    //@Autowired
+    //private MedicoRepository repository;
+
+    private final MedicoRepository repository;
+
+    public MedicoController(MedicoRepository repository) {
+        this.repository = repository;
+    }
 
     @PostMapping
     @Transactional
