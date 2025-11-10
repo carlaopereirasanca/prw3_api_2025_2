@@ -1,5 +1,6 @@
 package br.edu.ifsp.prw3.api_2025_2.util.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,17 +11,32 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfigurations {
 
+    @Autowired
+    private SecurityFilter securityFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http.csrf(csrf -> csrf.disable())
-                   .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                   .build();
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // configurar autorizações para as requisições:
+                .authorizeHttpRequests(req -> {
+                    // liberar o /login
+                    req.requestMatchers("/login").permitAll();
+                    // todas as outras, só para usuários autenticados
+                    req.anyRequest().authenticated();
+                })
+                // definindo a ordem de aplicação dos filtros:
+                // primeiro, o nosso filtro (classe SecurityFilter injetada aqui)
+                // depois, o filtro de usuarios autenticados do proprio spring
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
 
@@ -29,9 +45,7 @@ public class SecurityConfigurations {
             throws Exception {
 
         return configuration.getAuthenticationManager();
-
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
